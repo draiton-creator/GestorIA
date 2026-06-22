@@ -326,8 +326,8 @@ export default function IntegracionesWorkspace({
     setSelectedInvoiceForExport(invoiceId);
     const invoice = invoices.find(inv => inv.id === invoiceId);
     if (invoice) {
-      const invNum = invoice.number || invoice.invoiceNumber || invoice.id.substring(0,8).toUpperCase();
-      const invConcept = invoice.concept || (invoice.items && invoice.items[0]?.description) || 'Servicios Prestados';
+      const invNum = invoice.number || invoice.id.substring(0,8).toUpperCase();
+      const invConcept = (invoice.items && invoice.items[0]?.description) || 'Servicios Prestados';
       const invSubtotal = invoice.subtotal || invoice.total || 0;
       const invIva = invoice.ivaAmount || (invSubtotal * (invoice.ivaRate || 21) / 100);
       const invTotal = invoice.total || (invSubtotal + invIva);
@@ -610,8 +610,8 @@ RESUMEN FINANCIERO DEL EJERCICIO ACUMULADO DESDE ERP:
 
 DETALLE DE ÚLTIMAS FACTURAS ASENTADAS:
 ${invoices.map((inv, idx) => {
-  const num = inv.number || inv.invoiceNumber || 'Borrador';
-  const concept = inv.concept || (inv.items && inv.items[0]?.description) || 'Servicios Prestados';
+  const num = inv.number || 'Borrador';
+  const concept = (inv.items && inv.items[0]?.description) || 'Servicios Prestados';
   const base = inv.subtotal || inv.total || 0;
   return `${idx + 1}. Num Factura: ${num} | Concepto: ${concept} | Base: ${base} EUR | Fecha: ${inv.date}`;
 }).join('\n')}
@@ -696,12 +696,12 @@ Este reporte es confidencial y ha sido certificado por los algoritmos analítico
         ["FECHA SEÑALADA", "FAC. NÚMERO", "CONCEPTO EMISOR", "CLIENTE/PROVEEDOR", "IMPORTE BASE (EUR)", "TIPO DE IVA", "ESTADO COMERCIAL"],
         ...invoices.map(inv => [
           inv.date,
-          inv.number || inv.invoiceNumber || inv.id.substring(0,8).toUpperCase(),
-          inv.concept || (inv.items && inv.items[0]?.description) || 'Servicios Prestados',
+          inv.number || inv.id.substring(0,8).toUpperCase(),
+          (inv.items && inv.items[0]?.description) || 'Servicios Prestados',
           inv.clientName,
           inv.subtotal || inv.total || 0,
           `${inv.ivaRate || 21}%`,
-          (inv.status === 'Paid' || inv.status === 'Pagada') ? 'COBRADO' : 'PENDIENTE'
+          inv.status === 'Pagada' ? 'COBRADO' : 'PENDIENTE'
         ]),
         [],
         ["RESUMEN ACUMULADO"],
@@ -905,7 +905,7 @@ Este reporte es confidencial y ha sido certificado por los algoritmos analítico
                     <option value="">-- Selecciona una Factura para Redactar --</option>
                     {invoices.map(inv => (
                       <option key={inv.id} value={inv.id}>
-                        {inv.number || inv.invoiceNumber || inv.id.substring(0,8).toUpperCase()} - {inv.concept || (inv.items && inv.items[0]?.description) || 'Servicios Prestados'} ({(inv.total || 0).toLocaleString()} €)
+                        {inv.number || inv.id.substring(0,8).toUpperCase()} - {(inv.items && inv.items[0]?.description) || 'Servicios Prestados'} ({(inv.total || 0).toLocaleString()} €)
                       </option>
                     ))}
                   </select>

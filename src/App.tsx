@@ -7,7 +7,6 @@ import {
   INITIAL_EXPENSES,
   INITIAL_PROJECTS,
   INITIAL_TASKS,
-  INITIAL_CRM_CONTACTY_DATA, // wait, let's verify if we named it INITIAL_CRM_CONTACTS in mockData
   INITIAL_CRM_CONTACTS
 } from './mockData';
 import {
@@ -22,7 +21,8 @@ import {
   UserRole
 } from './types';
 import { auth, googleProvider, db } from './firebase';
-import { signInWithPopup, signOut, User, createUserWithEmailAndPassword, signInWithEmailAndPassword, GoogleAuthProvider } from 'firebase/auth';
+import { signInWithPopup, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword, GoogleAuthProvider } from 'firebase/auth';
+import type { User as FirebaseUser } from 'firebase/auth';
 import { doc, getDoc, setDoc, collection, query, where, getDocs } from 'firebase/firestore';
 
 // Submódulos
@@ -287,7 +287,7 @@ export default function App() {
   const [currentUserRole, setCurrentUserRole] = useState<UserRole>('Usuario Administrador');
 
   // Firebase auth state
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [currentUser, setCurrentUser] = useState<FirebaseUser | null>(null);
   const [isAuthLoading, setIsAuthLoading] = useState(true);
   const [isDemoMode, setIsDemoMode] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
@@ -1190,7 +1190,7 @@ export default function App() {
             <div className="flex items-center justify-between gap-1.5 mt-2 bg-white border border-slate-150/70 shadow-3xs rounded-lg px-2.5 py-1.5">
               <span className="text-[10px] text-slate-500 font-semibold font-mono">NIF:</span>
               <span className="text-[10px] font-bold text-slate-700 uppercase font-mono">
-                {companyConfig.nif || companyConfig.cif || "B16896953"}
+                {companyConfig.nif || "—"}
               </span>
             </div>
           </div>
@@ -1629,8 +1629,8 @@ export default function App() {
         <div className="max-w-7xl mx-auto px-4 space-y-4">
           <InstitutionalLogos lightMode={false} />
           <div className="pt-4 flex flex-col items-center justify-center gap-1 text-slate-450">
-            <p className="font-bold text-slate-350 font-display text-sm">GestorIA corporativo - Software de Certificación IA</p>
-            <p className="text-slate-500">© 2026 GestorIA. Diseñado con alineaciones de la Agencia Tributaria Española y el Plan Adelante Digital.</p>
+            <p className="font-bold text-slate-350 font-display text-sm">Espacios Castellanos de Innovación, SLU (EC-Innova) - Software de Certificación IA</p>
+            <p className="text-slate-500">© 2026 Espacios Castellanos de Innovación, SLU (EC-Innova). Diseñado con alineaciones de la Agencia Tributaria Española y el Plan Adelante Digital.</p>
             <p className="text-[10px] text-slate-600 font-mono">Consola Cloud Node ID: 2abfa251 • Base de datos persistente mediante Google Cloud Firestore y seguridad perimetral de Firebase Auth</p>
           </div>
         </div>

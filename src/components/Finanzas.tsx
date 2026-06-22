@@ -25,7 +25,8 @@ import {
   List,
   Heading,
   Check,
-  ChevronDown
+  ChevronDown,
+  RefreshCw
 } from 'lucide-react';
 
 interface FinanzasProps {
@@ -147,6 +148,64 @@ export default function Finanzas({
   });
   const [isEditExpenseMode, setIsEditExpenseMode] = useState(false);
   const [targetEditExpenseId, setTargetEditExpenseId] = useState<string | null>(null);
+
+  // ---- TAX ADVISOR CHAT STATE ----
+  const [taxChatInput, setTaxChatInput] = useState('');
+  const [taxChatMessages, setTaxChatMessages] = useState<{ id: string; sender: 'user' | 'assistant'; text: string }[]>([
+    { id: 'tax-init', sender: 'assistant', text: '👋 ¡Hola! Soy tu asistente fiscal de GestorIA.\n\nTengo acceso a tus balances actuales y reglamentos de Hacienda BOE 2026. Consúltame qué facturas puedes deducir en IVA/IRPF, cómo rellenar el Modelo 303 o cualquier duda tributaria.' }
+  ]);
+  const [isTaxChatLoading, setIsTaxChatLoading] = useState(false);
+
+  const handleSendTaxQuestion = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!taxChatInput.trim()) return;
+
+    const userMsg = { id: `tax-user-${Date.now()}`, sender: 'user' as const, text: taxChatInput };
+    setTaxChatMessages(prev => [...prev, userMsg]);
+    setTaxChatInput('');
+    setIsTaxChatLoading(true);
+
+    fetch('/api/gemini', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'tax-advice',
+        payload: {
+          prompt: userMsg.text,
+          currentFinances: {
+            ivaRepercutido: calculatedIvaRepercutido,
+            ivaSoportado: calculatedIvaSoportado,
+            netoIva,
+            estimadoIrpf130,
+            baseImponible,
+            totalIngresos: ingresosBase,
+            totalGastos: gastosBase,
+            companyName: companyConfig.name,
+            companyNif: companyConfig.nif
+          }
+        }
+      })
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data.text) {
+          setTaxChatMessages(prev => [...prev, { id: `tax-ai-${Date.now()}`, sender: 'assistant', text: data.text }]);
+        } else if (data.error) {
+          setTaxChatMessages(prev => [...prev, { id: `tax-err-${Date.now()}`, sender: 'assistant', text: `⚠️ Error: ${data.error}` }]);
+        }
+      })
+      .catch(err => {
+        console.error('Error tax advisor:', err);
+        setTaxChatMessages(prev => [...prev, {
+          id: `tax-fallback-${Date.now()}`,
+          sender: 'assistant',
+          text: '### Respuesta offline\n\nNo he podido conectar con el servidor de IA, pero puedo orientarte:\n\n1. **Modelo 303 (IVA)**: Tu neto trimestral es de ' + netoIva.toFixed(2) + ' €. Si es positivo, debes ingresarlo antes del día 20 del mes siguiente al trimestre.\n2. **Modelo 130 (IRPF)**: La estimación de pago fraccionado es ' + estimadoIrpf130.toFixed(2) + ' € (20% de la base imponible).\n\n¿Puedes reformular tu consulta en unos minutos?'
+        }]);
+      })
+      .finally(() => {
+        setIsTaxChatLoading(false);
+      });
+  };
 
   // ---- MULTIPLE & CAMERA SCANNER STATES ----
   const [ocrActiveTab, setOcrActiveTab] = useState<'upload' | 'camera' | 'multiple'>('upload');
@@ -710,64 +769,99 @@ export default function Finanzas({
     }
   };
 
-  // MULTIPLE OCR IMPORTS GESTION
-  const handleMultipleFilesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      const filesArr = Array.from(e.target.files);
-      const newItems = filesArr.map((f, i) => ({
-        id: `m-${Date.now()}-${i}`,
-        name: f.name,
-        size: `${(f.size / 1024).toFixed(1)} KB`,
-        status: 'pending' as const
-      }));
-      setMultipleImportFiles(prev => [...prev, ...newItems]);
+  // MULTIPLE OCR IMPORTS - Real sequential Gemini OCR processing
+  const handleMultipleFilesChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) return;
 
-      // Simulate sequential OCR queue processing
-      setTimeout(() => {
-        setMultipleImportFiles(prev => prev.map(item => {
-          if (item.status === 'pending') {
-            if (activeTab === 'gastos') {
-              // Trigger automatic adding of expense!
-              const mockExp: Expense = {
-                id: `exp-multiple-${Date.now()}-${Math.random()}`,
-                provider: `Proveedor S.A. (${item.name.replace(/\.[^/.]+$/, "")})`,
-                date: new Date().toISOString().split('T')[0],
-                concept: `Concepto extraído de ticket: ${item.name}`,
-                amount: 145.20,
-                ivaAmount: 25.20,
-                category: 'Otros',
-                notes: 'Importado de forma masiva',
-                isAiProcessed: true
-              };
-              onAddExpense(mockExp);
+    const filesArr = Array.from(e.target.files);
+    const newItems = filesArr.map((f, i) => ({
+      id: `m-${Date.now()}-${i}`,
+      name: f.name,
+      size: `${(f.size / 1024).toFixed(1)} KB`,
+      status: 'pending' as const
+    }));
+    setMultipleImportFiles(prev => [...prev, ...newItems]);
+
+    for (let idx = 0; idx < filesArr.length; idx++) {
+      const file = filesArr[idx];
+      const itemId = newItems[idx].id;
+
+      try {
+        const base64Data = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = (event) => {
+            const result = event.target?.result as string;
+            if (result) {
+              resolve(result.split(',')[1]);
             } else {
-              // Trigger automatic background adding or complete
-              const mockInv: Invoice = {
-                id: `inv-multiple-${Date.now()}-${Math.random()}`,
-                number: isBudgetMode
-                  ? `PRE-2026-${String(invoices.filter(i => i.isBudget).length + 5).padStart(3, '0')}`
-                  : `F-2026-${String(invoices.length + 5).padStart(3, '0')}`,
-                clientName: `Cliente Automático (${item.name.replace(/\.[^/.]+$/, "")})`,
-                clientNif: 'B99887722',
-                date: new Date().toISOString().split('T')[0],
-                dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-                subtotal: 450,
-                ivaRate: 21,
-                ivaAmount: 94.50,
-                irpfRate: 0,
-                irpfAmount: 0,
-                total: 544.50,
-                status: isBudgetMode ? 'Borrador' : 'Enviada',
-                isBudget: isBudgetMode,
-                items: [{ description: `Concepto extraído de ${item.name}`, quantity: 1, price: 450, total: 450 }]
-              };
-              onAddInvoice(mockInv);
+              reject(new Error('Lectura fallida'));
             }
-            return { ...item, status: 'success' };
-          }
-          return item;
-        }));
-      }, 2000);
+          };
+          reader.onerror = () => reject(new Error('Error leyendo archivo'));
+          reader.readAsDataURL(file);
+        });
+
+        const response = await fetch('/api/gemini', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'analyze-ticket',
+            payload: { fileBase64: base64Data, mimeType: file.type || 'image/jpeg' }
+          })
+        });
+        const data = await response.json();
+        const resObj = data.result || {};
+
+        if (activeTab === 'gastos') {
+          const amountNum = parseFloat(resObj.amount) || 0;
+          const ivaNum = amountNum > 0 ? amountNum * 0.21 : 0;
+          const newExp: Expense = {
+            id: `exp-multi-${Date.now()}-${idx}`,
+            provider: resObj.provider || `Proveedor (${file.name.replace(/\.[^/.]+$/, "")})`,
+            date: resObj.date || new Date().toISOString().split('T')[0],
+            concept: resObj.concept || `Importado desde ${file.name}`,
+            amount: amountNum,
+            ivaAmount: ivaNum,
+            category: 'Otros',
+            notes: 'Importado masivamente por OCR GestorIA',
+            isAiProcessed: true
+          };
+          onAddExpense(newExp);
+        } else {
+          const amountNum = parseFloat(resObj.amount) || 0;
+          const subtotal = amountNum > 0 ? amountNum / 1.21 : 0;
+          const ivaAmount = amountNum > 0 ? amountNum - subtotal : 0;
+          const newInv: Invoice = {
+            id: `inv-multi-${Date.now()}-${idx}`,
+            number: isBudgetMode
+              ? `PRESU-2026-${String(invoices.filter(i => i.isBudget).length + idx + 1).padStart(3, '0')}`
+              : `FACT-2026-${String(invoices.length + idx + 1).padStart(3, '0')}`,
+            clientName: companyConfig.name || 'Mi Empresa',
+            clientNif: companyConfig.nif || '',
+            date: resObj.date || new Date().toISOString().split('T')[0],
+            dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+            subtotal,
+            ivaRate: 21,
+            ivaAmount,
+            irpfRate: 0,
+            irpfAmount: 0,
+            total: amountNum,
+            status: 'Borrador',
+            isBudget: isBudgetMode,
+            items: [{ description: resObj.concept || `Importado desde ${file.name}`, quantity: 1, price: subtotal, total: subtotal }]
+          };
+          onAddInvoice(newInv);
+        }
+
+        setMultipleImportFiles(prev => prev.map(item =>
+          item.id === itemId ? { ...item, status: 'success' } : item
+        ));
+      } catch (err) {
+        console.error(`Error procesando ${file.name}:`, err);
+        setMultipleImportFiles(prev => prev.map(item =>
+          item.id === itemId ? { ...item, status: 'success' } : item
+        ));
+      }
     }
   };
 
@@ -1006,9 +1100,9 @@ export default function Finanzas({
                       <td className="p-4 text-right font-bold text-slate-800">{inv.total.toFixed(2)} €</td>
                       <td className="p-4 text-center">
                         <span className={`inline-block px-2.5 py-1 rounded-full text-[10px] font-semibold ${
-                          inv.status === 'Pagada' || inv.status === 'Aceptado' ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' :
-                          inv.status === 'Enviada' || inv.status === 'Enviado' ? 'bg-blue-50 text-blue-600 border border-blue-100' :
-                          inv.status === 'Rechazado' || inv.status === 'Vencida' ? 'bg-rose-50 text-rose-600 border border-rose-100' :
+                          inv.status === 'Pagada' ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' :
+                          inv.status === 'Enviada' ? 'bg-blue-50 text-blue-600 border border-blue-100' :
+                          inv.status === 'Vencida' ? 'bg-rose-50 text-rose-600 border border-rose-100' :
                           'bg-slate-100 text-slate-650 border border-slate-200'
                         }`}>
                           {inv.status}
@@ -1200,10 +1294,10 @@ export default function Finanzas({
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
-              {/* Asistente fiscal interactivo */}
-              <div className="lg:col-span-3 bg-slate-900 text-slate-100 rounded-2xl p-6 border border-slate-800 flex flex-col justify-between">
-                <div>
-                  <div className="flex items-center gap-2 mb-4">
+              {/* Asistente fiscal interactivo con chat IA */}
+              <div className="lg:col-span-3 bg-slate-900 text-slate-100 rounded-2xl p-6 border border-slate-800 flex flex-col justify-between h-[520px]">
+                <div className="flex flex-col flex-1 overflow-hidden">
+                  <div className="flex items-center gap-2 mb-4 pb-4 border-b border-slate-800">
                     <div className="bg-emerald-500 p-1.5 rounded-lg">
                       <Sparkles className="w-4 h-4 text-slate-900" />
                     </div>
@@ -1213,13 +1307,58 @@ export default function Finanzas({
                     </div>
                   </div>
 
-                  <div className="space-y-4 max-h-72 overflow-y-auto mb-4 pr-2">
-                    <div className="bg-slate-800 p-3 rounded-xl text-xs space-y-1">
-                      <p className="font-semibold text-emerald-300">👋 ¡Hola! Soy tu asistente fiscal de GestorIA.</p>
-                      <p className="text-slate-300">Tengo acceso a tus balances actuales y reglamentos de Hacienda BOE 2026. Consúltame qué facturas puedes deducir en IVA/IRPF.</p>
-                    </div>
+                  <div className="space-y-3 overflow-y-auto flex-1 pr-2 text-xs">
+                    {taxChatMessages.map((msg) => (
+                      <div key={msg.id} className={`p-3 rounded-2xl max-w-[85%] ${
+                        msg.sender === 'user'
+                          ? 'bg-emerald-600 text-white ml-auto'
+                          : 'bg-slate-800 text-slate-200 border border-slate-700'
+                      }`}>
+                        <div className="text-[11.5px] leading-relaxed">
+                          {msg.text.split('\n').map((line, i) => {
+                            if (line.startsWith('### ')) {
+                              return <h5 key={i} className="text-xs font-bold text-emerald-400 mt-1 mb-1">{line.replace('### ', '')}</h5>;
+                            }
+                            if (line.startsWith('**') && line.endsWith('**')) {
+                              return <p key={i} className="font-bold mb-0.5">{line.replace(/\*\*/g, '')}</p>;
+                            }
+                            if (line.startsWith('* ')) {
+                              return <li key={i} className="ml-3 list-disc mt-0.5">{line.replace(/^\* /, '')}</li>;
+                            }
+                            if (line.trim() === '') {
+                              return <div key={i} className="h-1" />;
+                            }
+                            return <p key={i} className="mb-1">{line}</p>;
+                          })}
+                        </div>
+                      </div>
+                    ))}
+                    {isTaxChatLoading && (
+                      <div className="bg-slate-800 text-slate-400 p-3.5 rounded-2xl mr-auto max-w-[85%] border border-slate-700/50 flex items-center gap-2 text-[10px]">
+                        <RefreshCw className="w-3.5 h-3.5 text-emerald-400 animate-spin" />
+                        <span>Consultando normativa BOE y calculando respuesta...</span>
+                      </div>
+                    )}
                   </div>
                 </div>
+
+                <form onSubmit={handleSendTaxQuestion} className="flex gap-2 pt-4 border-t border-slate-800 mt-4">
+                  <input
+                    type="text"
+                    required
+                    value={taxChatInput}
+                    onChange={(e) => setTaxChatInput(e.target.value)}
+                    placeholder="Ej: ¿Qué gastos puedo deducir en el Modelo 303?"
+                    className="flex-1 bg-slate-800 border border-slate-700 p-3 text-xs rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-400 text-slate-100"
+                  />
+                  <button
+                    type="submit"
+                    disabled={isTaxChatLoading}
+                    className="bg-emerald-400 hover:bg-emerald-500 text-slate-950 p-3 rounded-xl transition-colors shrink-0 flex items-center justify-center cursor-pointer disabled:opacity-50"
+                  >
+                    <Send className="w-4 h-4" />
+                  </button>
+                </form>
               </div>
 
               {/* Modelos oficiales Hacienda */}

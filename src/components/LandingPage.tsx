@@ -172,7 +172,7 @@ export default function LandingPage({
             </button>
             <button
               onClick={() => handleOpenAuth('register')}
-              className="bg-indigo-650 hover:bg-indigo-700 text-white font-semibold px-5 py-2.5 rounded-xl text-xs flex items-center gap-1.5 shadow-sm transition-all cursor-pointer"
+              className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-5 py-2.5 rounded-xl text-xs flex items-center gap-1.5 shadow-sm transition-all cursor-pointer"
             >
               <span>Registrarse</span>
               <ArrowRight className="w-4 h-4" />
@@ -1048,9 +1048,9 @@ export default function LandingPage({
               <div className="bg-indigo-50 p-2 rounded-xl border border-indigo-150/40">
                 <Sparkles className="w-4 h-4 text-indigo-650" />
               </div>
-              <span className="font-bold text-slate-900 tracking-tight text-sm">GestorIA corporativo S.L.</span>
+              <span className="font-bold text-slate-900 tracking-tight text-sm">Espacios Castellanos de Innovación, SLU (EC-Innova)</span>
             </div>
-            <p>© 2026 GestorIA corporativo. Todos los derechos reservados. Cumplimiento BOE y Agencia Tributaria Española.</p>
+            <p>© 2026 Espacios Castellanos de Innovación, SLU (EC-Innova). Todos los derechos reservados. Cumplimiento BOE y Agencia Tributaria Española.</p>
             <p className="max-w-2xl mx-auto text-[10px] text-slate-400 font-mono">
               Sistemas de reconocimiento de facturas y auditoría modular. Base de datos persistente integrada mediante Google Cloud Firestore y seguridad perimetral de Firebase Auth. Consola Cloud Node ID: 2abfa251.
             </p>
