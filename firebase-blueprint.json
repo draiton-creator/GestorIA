@@ -1,0 +1,378 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile with company details and subscription information",
+      "type": "object",
+      "properties": {
+        "company": {
+          "type": "object",
+          "properties": {
+            "address": { "type": "string" },
+            "brandColor": { "type": "string" },
+            "cif": { "type": "string" },
+            "name": { "type": "string" }
+          },
+          "required": ["address", "brandColor", "cif", "name"]
+        },
+        "createdAt": { "type": "object" },
+        "displayName": { "type": "string" },
+        "email": { "type": "string" },
+        "name": { "type": "string" },
+        "providerData": { "type": "array" },
+        "role": { "type": "string" },
+        "subscription": {
+          "type": "object",
+          "properties": {
+            "endDate": { "type": "object" },
+            "status": { "type": "string" },
+            "type": { "type": "string" }
+          }
+        },
+        "companyConfig": { "type": "object" },
+        "invoices": { "type": "array" },
+        "expenses": { "type": "array" },
+        "projects": { "type": "array" },
+        "tasks": { "type": "array" },
+        "crmContacts": { "type": "array" },
+        "bankTransactions": { "type": "array" }
+      },
+      "required": ["email", "role"]
+    },
+    "Absence": {
+      "title": "Absence",
+      "description": "Employee absence requests",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "employeeId": { "type": "string" },
+        "startDate": { "type": "string" },
+        "endDate": { "type": "string" },
+        "reason": { "type": "string" },
+        "status": { "type": "string" }
+      }
+    },
+    "AdminImpersonation": {
+      "title": "AdminImpersonation",
+      "description": "Audit log for admin impersonations",
+      "type": "object",
+      "properties": {
+        "adminId": { "type": "string" },
+        "targetUserId": { "type": "string" },
+        "timestamp": { "type": "object" }
+      }
+    },
+    "Contact": {
+      "title": "Contact",
+      "description": "CRM contacts",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "name": { "type": "string" },
+        "phone": { "type": "string" },
+        "email": { "type": "string" }
+      }
+    },
+    "Customer": {
+      "title": "Customer",
+      "description": "Client accounts",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "name": { "type": "string" },
+        "cif": { "type": "string" },
+        "email": { "type": "string" }
+      }
+    },
+    "Employee": {
+      "title": "Employee",
+      "description": "Company employees",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "name": { "type": "string" },
+        "role": { "type": "string" },
+        "email": { "type": "string" }
+      }
+    },
+    "Expense": {
+      "title": "Expense",
+      "description": "Company expenses",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "provider": { "type": "string" },
+        "amount": { "type": "number" },
+        "date": { "type": "string" }
+      }
+    },
+    "ExtensionCatalog": {
+      "title": "ExtensionCatalog",
+      "description": "Available product extensions",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "price": { "type": "number" }
+      }
+    },
+    "FichajeChangeRequest": {
+      "title": "FichajeChangeRequest",
+      "description": "Request to modify time clock entries",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "fichajeId": { "type": "string" },
+        "requestedTime": { "type": "string" },
+        "status": { "type": "string" }
+      }
+    },
+    "Fichaje": {
+      "title": "Fichaje",
+      "description": "Workday time-clock sessions",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "checkIn": { "type": "object" },
+        "checkOut": { "type": "object" }
+      }
+    },
+    "Invitation": {
+      "title": "Invitation",
+      "description": "SaaS team dynamic invitations",
+      "type": "object",
+      "properties": {
+        "email": { "type": "string" },
+        "role": { "type": "string" },
+        "status": { "type": "string" }
+      }
+    },
+    "Invoice": {
+      "title": "Invoice",
+      "description": "Customer invoices",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "clientName": { "type": "string" },
+        "total": { "type": "number" },
+        "status": { "type": "string" }
+      }
+    },
+    "MarketingCampaign": {
+      "title": "MarketingCampaign",
+      "description": "Social media dynamic campaigns",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "name": { "type": "string" },
+        "status": { "type": "string" }
+      }
+    },
+    "Notification": {
+      "title": "Notification",
+      "description": "In-app notifications",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "title": { "type": "string" },
+        "read": { "type": "boolean" }
+      }
+    },
+    "PaymentLog": {
+      "title": "PaymentLog",
+      "description": "Payments activity log",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "amount": { "type": "number" },
+        "status": { "type": "string" }
+      }
+    },
+    "Payroll": {
+      "title": "Payroll",
+      "description": "Employee monthly payrolls",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "employeeId": { "type": "string" },
+        "salary": { "type": "number" }
+      }
+    },
+    "Product": {
+      "title": "Product",
+      "description": "Offered goods and inventory items",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "name": { "type": "string" },
+        "price": { "type": "number" }
+      }
+    },
+    "Project": {
+      "title": "Project",
+      "description": "Client projects",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "name": { "type": "string" },
+        "budget": { "type": "number" }
+      }
+    },
+    "SavedGrant": {
+      "title": "SavedGrant",
+      "description": "Subvenciones guardadas por el usuario",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "grantId": { "type": "string" }
+      }
+    },
+    "ScheduledPost": {
+      "title": "ScheduledPost",
+      "description": "Social tasks posts scheduled",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "title": { "type": "string" },
+        "publishAt": { "type": "string" }
+      }
+    },
+    "SupportTicket": {
+      "title": "SupportTicket",
+      "description": "App customer help tickets",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "subject": { "type": "string" },
+        "status": { "type": "string" }
+      }
+    },
+    "Task": {
+      "title": "Task",
+      "description": "Company or project tasks",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "projectId": { "type": "string" },
+        "title": { "type": "string" },
+        "status": { "type": "string" }
+      }
+    },
+    "TaxAlert": {
+      "title": "TaxAlert",
+      "description": "System or admin tax alert checks",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "msg": { "type": "string" },
+        "urgent": { "type": "boolean" }
+      }
+    },
+    "TestConnection": {
+      "title": "TestConnection",
+      "description": "Simple test document collection",
+      "type": "object",
+      "properties": {
+        "status": { "type": "string" }
+      }
+    }
+  },
+  "firestore": {
+    "users/{userId}": {
+      "schema": "User",
+      "description": "The system users"
+    },
+    "absences/{absenceId}": {
+      "schema": "Absence",
+      "description": "Absences collection"
+    },
+    "admin_impersonations/{impId}": {
+      "schema": "AdminImpersonation",
+      "description": "Admin impersonations check"
+    },
+    "contacts/{contactId}": {
+      "schema": "Contact",
+      "description": "SaaS CRM Contacts"
+    },
+    "customers/{customerId}": {
+      "schema": "Customer",
+      "description": "SaaS CRM Customers"
+    },
+    "employees/{employeeId}": {
+      "schema": "Employee",
+      "description": "SaaS Employees list"
+    },
+    "expenses/{expenseId}": {
+      "schema": "Expense",
+      "description": "SaaS Expenses table"
+    },
+    "extensions_catalog/{catalogId}": {
+      "schema": "ExtensionCatalog",
+      "description": "Extensions overview"
+    },
+    "fichajeChangeRequests/{requestId}": {
+      "schema": "FichajeChangeRequest",
+      "description": "Time Clock requests"
+    },
+    "fichajes/{fichajeId}": {
+      "schema": "Fichaje",
+      "description": "Employee Time Clocks"
+    },
+    "invitations/{invitationId}": {
+      "schema": "Invitation",
+      "description": "Invites workspace list"
+    },
+    "invoices/{invoiceId}": {
+      "schema": "Invoice",
+      "description": "SaaS Client Invoices"
+    },
+    "marketing_campaigns/{campaignId}": {
+      "schema": "MarketingCampaign",
+      "description": "SaaS Marketing list"
+    },
+    "notifications/{notificationId}": {
+      "schema": "Notification",
+      "description": "Workspace App Notifications"
+    },
+    "payment_logs/{logId}": {
+      "schema": "PaymentLog",
+      "description": "Subscription operations log"
+    },
+    "payrolls/{payrollId}": {
+      "schema": "Payroll",
+      "description": "Employee payroll bills"
+    },
+    "products/{productId}": {
+      "schema": "Product",
+      "description": "SaaS items inventory list"
+    },
+    "projects/{projectId}": {
+      "schema": "Project",
+      "description": "Corporate client projects"
+    },
+    "savedGrants/{savedID}": {
+      "schema": "SavedGrant",
+      "description": "Subvenciones guardadas"
+    },
+    "scheduledPosts/{postId}": {
+      "schema": "ScheduledPost",
+      "description": "Social posts scheduler list"
+    },
+    "supportTickets/{ticketId}": {
+      "schema": "SupportTicket",
+      "description": "App technical help tickets"
+    },
+    "tasks/{taskId}": {
+      "schema": "Task",
+      "description": "SaaS projects tasks"
+    },
+    "tax_alerts/{alertId}": {
+      "schema": "TaxAlert",
+      "description": "SaaS tax system notifications"
+    },
+    "test_connection/{testId}": {
+      "schema": "TestConnection",
+      "description": "Connectivity test table"
+    }
+  }
+}

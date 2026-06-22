@@ -1,0 +1,6 @@
+{
+  "name": "GestorIA",
+  "description": "SaaS de gestión empresarial inteligente con visión predictiva de finanzas, facturación, CRM y asistente fiscal español asistido por IA.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

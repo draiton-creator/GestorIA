@@ -1,0 +1,88 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // 1. Global default-deny safety net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // --- REUSABLE SECURITY PRIMITIVES ---
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(ownerId) {
+      return isSignedIn() && ownerId == request.auth.uid;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    // --- COLLECTION RULES ---
+
+    // 1. Users
+    match /users/{userId} {
+      allow get: if isSignedIn() && request.auth.uid == userId;
+      allow create, update: if isSignedIn() && request.auth.uid == userId;
+      allow delete: if false;
+    }
+
+    // 2. Invoices
+    match /invoices/{invoiceId} {
+      allow get: if isSignedIn() && (resource == null || resource.data.ownerId == request.auth.uid);
+      allow list: if isSignedIn() && resource.data.ownerId == request.auth.uid;
+      allow create, update: if isSignedIn() && request.resource.data.ownerId == request.auth.uid;
+      allow delete: if isSignedIn() && resource.data.ownerId == request.auth.uid;
+    }
+
+    // 3. Expenses
+    match /expenses/{expenseId} {
+      allow get: if isSignedIn() && (resource == null || resource.data.ownerId == request.auth.uid);
+      allow list: if isSignedIn() && resource.data.ownerId == request.auth.uid;
+      allow create, update: if isSignedIn() && request.resource.data.ownerId == request.auth.uid;
+      allow delete: if isSignedIn() && resource.data.ownerId == request.auth.uid;
+    }
+
+    // 4. Projects
+    match /projects/{projectId} {
+      allow get: if isSignedIn() && (resource == null || resource.data.ownerId == request.auth.uid);
+      allow list: if isSignedIn() && resource.data.ownerId == request.auth.uid;
+      allow create, update: if isSignedIn() && request.resource.data.ownerId == request.auth.uid;
+      allow delete: if isSignedIn() && resource.data.ownerId == request.auth.uid;
+    }
+
+    // 5. Tasks
+    match /tasks/{taskId} {
+      allow get: if isSignedIn() && (resource == null || resource.data.ownerId == request.auth.uid);
+      allow list: if isSignedIn() && resource.data.ownerId == request.auth.uid;
+      allow create, update: if isSignedIn() && request.resource.data.ownerId == request.auth.uid;
+      allow delete: if isSignedIn() && resource.data.ownerId == request.auth.uid;
+    }
+
+    // 6. Contacts
+    match /contacts/{contactId} {
+      allow get: if isSignedIn() && (resource == null || resource.data.ownerId == request.auth.uid);
+      allow list: if isSignedIn() && resource.data.ownerId == request.auth.uid;
+      allow create, update: if isSignedIn() && request.resource.data.ownerId == request.auth.uid;
+      allow delete: if isSignedIn() && resource.data.ownerId == request.auth.uid;
+    }
+
+    // 7. Customers
+    match /customers/{customerId} {
+      allow get: if isSignedIn() && (resource == null || resource.data.ownerId == request.auth.uid);
+      allow list: if isSignedIn() && resource.data.ownerId == request.auth.uid;
+      allow create, update: if isSignedIn() && request.resource.data.ownerId == request.auth.uid;
+      allow delete: if isSignedIn() && resource.data.ownerId == request.auth.uid;
+    }
+
+    // 8. Payment Logs / Bank Transactions
+    match /payment_logs/{logId} {
+      allow get: if isSignedIn() && (resource == null || resource.data.ownerId == request.auth.uid);
+      allow list: if isSignedIn() && resource.data.ownerId == request.auth.uid;
+      allow create, update: if isSignedIn() && request.resource.data.ownerId == request.auth.uid;
+      allow delete: if isSignedIn() && resource.data.ownerId == request.auth.uid;
+    }
+  }
+}
