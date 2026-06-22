@@ -1006,9 +1006,9 @@ export default function Finanzas({
                       <td className="p-4 text-right font-bold text-slate-800">{inv.total.toFixed(2)} €</td>
                       <td className="p-4 text-center">
                         <span className={`inline-block px-2.5 py-1 rounded-full text-[10px] font-semibold ${
-                          inv.status === 'Pagada' || inv.status === 'Aceptado' ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' :
-                          inv.status === 'Enviada' || inv.status === 'Enviado' ? 'bg-blue-50 text-blue-600 border border-blue-100' :
-                          inv.status === 'Rechazado' || inv.status === 'Vencida' ? 'bg-rose-50 text-rose-600 border border-rose-100' :
+                          inv.status === 'Pagada' ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' :
+                          inv.status === 'Enviada' ? 'bg-blue-50 text-blue-600 border border-blue-100' :
+                          inv.status === 'Vencida' ? 'bg-rose-50 text-rose-600 border border-rose-100' :
                           'bg-slate-100 text-slate-650 border border-slate-200'
                         }`}>
                           {inv.status}

@@ -26,7 +26,7 @@ export const INITIAL_SYSTEM_USERS: SystemUser[] = [
     id: "user-1",
     name: "Draiton Innova",
     email: "draiton@ec-innova.es",
-    role: "Administrador",
+    role: "Usuario Administrador",
     active: true,
     joinedAt: "2025-01-10"
   },
@@ -34,7 +34,7 @@ export const INITIAL_SYSTEM_USERS: SystemUser[] = [
     id: "user-2",
     name: "María Gómez",
     email: "m.gomez@construccionesinnovadoras.es",
-    role: "Contable",
+    role: "Usuario Empresa",
     active: true,
     joinedAt: "2025-03-15"
   },
@@ -42,7 +42,7 @@ export const INITIAL_SYSTEM_USERS: SystemUser[] = [
     id: "user-3",
     name: "Carlos Pérez",
     email: "c.perez@construccionesinnovadoras.es",
-    role: "Operador",
+    role: "Usuario Free",
     active: true,
     joinedAt: "2025-05-20"
   },
@@ -50,7 +50,7 @@ export const INITIAL_SYSTEM_USERS: SystemUser[] = [
     id: "user-4",
     name: "Sofía Ruiz",
     email: "sofia.ruiz@externo.es",
-    role: "Operador",
+    role: "Usuario Free",
     active: false,
     joinedAt: "2026-02-01"
   }

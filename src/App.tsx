@@ -7,7 +7,6 @@ import {
   INITIAL_EXPENSES,
   INITIAL_PROJECTS,
   INITIAL_TASKS,
-  INITIAL_CRM_CONTACTY_DATA, // wait, let's verify if we named it INITIAL_CRM_CONTACTS in mockData
   INITIAL_CRM_CONTACTS
 } from './mockData';
 import {
@@ -22,7 +21,8 @@ import {
   UserRole
 } from './types';
 import { auth, googleProvider, db } from './firebase';
-import { signInWithPopup, signOut, User, createUserWithEmailAndPassword, signInWithEmailAndPassword, GoogleAuthProvider } from 'firebase/auth';
+import { signInWithPopup, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword, GoogleAuthProvider } from 'firebase/auth';
+import type { User as FirebaseUser } from 'firebase/auth';
 import { doc, getDoc, setDoc, collection, query, where, getDocs } from 'firebase/firestore';
 
 // Submódulos
@@ -287,7 +287,7 @@ export default function App() {
   const [currentUserRole, setCurrentUserRole] = useState<UserRole>('Usuario Administrador');
 
   // Firebase auth state
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [currentUser, setCurrentUser] = useState<FirebaseUser | null>(null);
   const [isAuthLoading, setIsAuthLoading] = useState(true);
   const [isDemoMode, setIsDemoMode] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
@@ -1190,7 +1190,7 @@ export default function App() {
             <div className="flex items-center justify-between gap-1.5 mt-2 bg-white border border-slate-150/70 shadow-3xs rounded-lg px-2.5 py-1.5">
               <span className="text-[10px] text-slate-500 font-semibold font-mono">NIF:</span>
               <span className="text-[10px] font-bold text-slate-700 uppercase font-mono">
-                {companyConfig.nif || companyConfig.cif || "B16896953"}
+                {companyConfig.nif || "—"}
               </span>
             </div>
           </div>
