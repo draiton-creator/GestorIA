@@ -99,7 +99,7 @@ function parseJSONSafely(text: string): any {
 
 async function startServer() {
   const app = express();
-  const PORT = 3000;
+  const PORT = Number(process.env.PORT) || 3000;
 
   // Configuración de Express para JSON
   app.use(express.json({ limit: "20mb" }));
@@ -428,9 +428,8 @@ Nota: las opciones para priority son 'Alta', 'Media' o 'Baja'. Las opciones para
     });
   }
 
-  // Iniciar servidor en PORT 3000 de forma obligatoria
   app.listen(PORT, "0.0.0.0", () => {
-    console.log(`Servidor de GestorIA ejecutándose con éxito en http://localhost:${PORT}`);
+    console.log(`Servidor de GestorIA ejecutándose con éxito en el puerto ${PORT}`);
   });
 }
 
