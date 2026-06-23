@@ -1625,13 +1625,13 @@ export default function App() {
       </main>
 
       {/* FOOTER DEL ERP */}
-      <footer className="bg-slate-900 border-t border-slate-800 mt-12 py-8 text-xs text-center">
+      <footer className="bg-white border-t border-slate-200 mt-12 py-8 text-xs text-center">
         <div className="max-w-7xl mx-auto px-4 space-y-4">
-          <InstitutionalLogos lightMode={false} />
-          <div className="pt-4 flex flex-col items-center justify-center gap-1 text-slate-450">
-            <p className="font-bold text-slate-350 font-display text-sm">Espacios Castellanos de Innovación, SLU (EC-Innova) - Software de Certificación IA</p>
+          <InstitutionalLogos lightMode={true} />
+          <div className="pt-4 flex flex-col items-center justify-center gap-1 text-slate-600">
+            <p className="font-bold text-slate-800 font-display text-sm">Espacios Castellanos de Innovación, SLU (EC-Innova) - Software de Certificación IA</p>
             <p className="text-slate-500">© 2026 Espacios Castellanos de Innovación, SLU (EC-Innova). Diseñado con alineaciones de la Agencia Tributaria Española y el Plan Adelante Digital.</p>
-            <p className="text-[10px] text-slate-600 font-mono">Consola Cloud Node ID: 2abfa251 • Base de datos persistente mediante Google Cloud Firestore y seguridad perimetral de Firebase Auth</p>
+            <p className="text-[10px] text-slate-400 font-mono">Consola Cloud Node ID: 2abfa251 • Base de datos persistente mediante Google Cloud Firestore y seguridad perimetral de Firebase Auth</p>
           </div>
         </div>
       </footer>
